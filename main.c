@@ -1,28 +1,10 @@
 #include "Include/glad/glad.h"
+#include "Include/shader/shader.h"
 
 #include <GLFW/glfw3.h>
 
 #include <stdbool.h>
 #include <stdio.h>
-
-// Simple vertex shader code
-const char *vertexShaderSource =
-    "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-
-// Simple fragment shader code
-const char *fragmentShaderSource =
-    "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "\n"
-    "void main()\n"
-    "{\n"
-    "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "} \n";
 
 // Settings
 const unsigned int SCR_WIDTH = 800;
@@ -33,7 +15,7 @@ glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
 unsigned int VBO, VAO, EBO; // Vertex objects
-unsigned int shaderProgram;
+Shader *shader;             // Shader struct
 
 // The function below is called whenever user resizes window.
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
@@ -70,7 +52,7 @@ void Update(GLFWwindow *window) {
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  glUseProgram(shaderProgram);
+  Use(shader);
   glBindVertexArray(VAO);
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -107,41 +89,11 @@ int main() {
     return -1;
   }
 
-  // Initializing, attaching and compiling vertex shader
-  unsigned int vertexShader;
-  vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-  glCompileShader(vertexShader);
+  const char *vertexPath = "./Shaders/vertexShader.glsl";
+  const char *fragmentPath = "./Shaders/fragmentShader.glsl";
 
-  CheckShaderCompilation(vertexShader);
-
-  // Initializing, attaching and compiling fragment shader
-  unsigned int fragmentShader;
-  fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-  glCompileShader(fragmentShader);
-
-  CheckShaderCompilation(vertexShader);
-
-  // Creating shader program
-  shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
-
-  // Debugging shader program
-  int success;
-  char infoLog[512];
-
-  glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-
-  if (!success) {
-    glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-    printf("ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s", infoLog);
-  }
-
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
+  // Generating shader
+  Shader *shader = NewShader(vertexPath, fragmentPath);
 
   // Triangle vertices
   float vertices[] = {
@@ -185,7 +137,8 @@ int main() {
   // Deleting arrays, buffers and programs.
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
-  glDeleteProgram(shaderProgram);
+  glDeleteProgram(shader->ID);
+  free(shader);
 
   // Clearing everything
   glfwTerminate();
