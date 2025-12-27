@@ -1,55 +1,62 @@
 #include "./shader.h"
 
-// Shader constructor
-Shader *NewShader(const char *vertexPath, const char *fragmentPath) {
-  // Allocatting strings
-  char *vertexCode;
-  char *fragmentCode;
+// Utility function for checking shader compilation/linking errors.
+void CheckCompileErrors(unsigned int shader, char *type) {
+  int success;
+  char infoLog[1024];
 
-  // Allocatting files
-  FILE *vertexPtr;
-  FILE *fragmentPtr;
+  if (strcmp(type, "PROGRAM")) {
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+      glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+      printf("ERROR::SHADER_COMPILATION_ERROR of type: %s\n%s\n", type,
+             infoLog);
+    }
+  } else {
+    glGetProgramiv(shader, GL_LINK_STATUS, &success);
+    if (!success) {
+      glGetProgramInfoLog(shader, 1024, NULL, infoLog);
+      printf("ERROR::PROGRAM_LINKING_ERROR of type: %s\n%s\n", type, infoLog);
+    }
+  }
+}
 
-  int ch; // Char int holder
-
-  // Open vertex file in read mode
-  vertexPtr = fopen(vertexPath, "r");
-  if (vertexPtr == NULL) {
-    printf("Failed to open vertex path.");
-    fclose(vertexPtr);
+// Read file
+char *ReadFile(const char *filePath) {
+  // Getting stream
+  FILE *file = fopen(filePath, "r");
+  if (file == NULL) {
+    printf("Error while opening vertex path.");
+    fclose(file);
   }
 
-  // Reading file and closing
-  while ((ch = fgetc(vertexPtr)) != EOF)
-    *vertexCode++ = ch;
+  // Getting length of file
+  fseek(file, 0, SEEK_END);
+  long length = ftell(file);
+  fseek(file, 0, SEEK_SET);
 
-  *vertexCode = '\0';
+  char *buffer = malloc(length + 1);
 
-  fclose(vertexPtr);
+  // Writing to buffer
+  size_t elements = fread(buffer, 1, length, file);
+  if (elements < length)
+    printf("Error while reading vertex path.");
+  fclose(file);
 
-  printf("%s\nEOF\n", vertexCode);
+  // Terminating string
+  buffer[length] = 0;
+
+  return buffer;
+};
+
+// Shader constructor
+Shader *NewShader(const char *vertexPath, const char *fragmentPath) {
+  // Reading files
+  char *vertexCode = ReadFile(vertexPath);
+  char *fragmentCode = ReadFile(fragmentPath);
 
   // Assigning to const
   const char *vertexCodeConst = vertexCode;
-
-  // Open fragment file in read mode
-  fragmentPtr = fopen(fragmentPath, "r");
-  if (fragmentPtr == NULL) {
-    printf("Failed to open fragment path.");
-    fclose(fragmentPtr);
-  }
-
-  // Reading file and closing
-  while ((ch = fgetc(fragmentPtr)) != EOF)
-    *fragmentCode++ = ch;
-
-  *fragmentCode = '\0';
-
-  fclose(fragmentPtr);
-
-  printf("%s\nEOF\n", fragmentCode);
-
-  // Assigning to const
   const char *fragmentCodeConst = fragmentCode;
 
   // Compiling shaders
@@ -62,45 +69,30 @@ Shader *NewShader(const char *vertexPath, const char *fragmentPath) {
   vertex = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex, 1, &vertexCodeConst, NULL);
   glCompileShader(vertex);
-
-  // Print compile errors if any
-  glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-    printf("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n%s", infoLog);
-  };
+  CheckCompileErrors(vertex, "VERTEX");
 
   // Fragment Shader
-  fragment = glCreateShader(GL_VERTEX_SHADER);
+  fragment = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragment, 1, &fragmentCodeConst, NULL);
   glCompileShader(fragment);
-
-  // Print compile errors if any
-  glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-    printf("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n%s", infoLog);
-  };
+  CheckCompileErrors(fragment, "FRAGMENT");
 
   // Shader program
   Shader *shader = (Shader *)malloc(sizeof(Shader));
-  unsigned int ID = glCreateProgram();
-  shader->ID = ID;
+  shader->ID = glCreateProgram();
 
-  glAttachShader(ID, vertex);
-  glAttachShader(ID, fragment);
-  glLinkProgram(ID);
+  glAttachShader(shader->ID, vertex);
+  glAttachShader(shader->ID, fragment);
+  glLinkProgram(shader->ID);
 
   // Print linking errors if any
-  glGetProgramiv(ID, GL_LINK_STATUS, &success);
-  if (!success) {
-    glGetProgramInfoLog(ID, 512, NULL, infoLog);
-    printf("ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s", infoLog);
-  }
+  CheckCompileErrors(shader->ID, "PROGRAM");
 
-  // Deleting the shaders
+  // Deleting the shaders and freeing memory
   glDeleteShader(vertex);
   glDeleteShader(fragment);
+  free(vertexCode);
+  free(fragmentCode);
 
   // Returning pointer
   return shader;

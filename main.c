@@ -15,7 +15,7 @@ glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
 unsigned int VBO, VAO, EBO; // Vertex objects
-Shader *shader;             // Shader struct
+Shader *shader;             // Shader
 
 // The function below is called whenever user resizes window.
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
@@ -27,20 +27,6 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
-}
-
-void CheckShaderCompilation(int shader) {
-  // Debuging vertex shader setup
-  int success;
-  char infoLog[512];
-
-  // Attaches status to success
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
-  if (!success) {
-    glGetShaderInfoLog(shader, 512, NULL, infoLog);
-    printf("ERROR::SHADER::COMPILATION_FAILED\n%s", infoLog);
-  }
 }
 
 // Runs every frame
@@ -93,7 +79,7 @@ int main() {
   const char *fragmentPath = "./Shaders/fragmentShader.glsl";
 
   // Generating shader
-  Shader *shader = NewShader(vertexPath, fragmentPath);
+  shader = NewShader(vertexPath, fragmentPath);
 
   // Triangle vertices
   float vertices[] = {
