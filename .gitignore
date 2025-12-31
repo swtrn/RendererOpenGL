@@ -1,2 +1,4 @@
+Include/stb_image/
 Include/glad/
+*.jpg
 out

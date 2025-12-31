@@ -1,8 +1,8 @@
 all: 
-	gcc main.c Include/glad/glad.c Include/shader/shader.c -o out -lGL -lglfw -ldl
+	gcc main.c ./Include/glad/glad.c ./Include/shader/shader.c ./Include/stb_image/stb_image.c -o out -lGL -lglfw -ldl -lm
 
 build:
-	gcc main.c Include/glad/glad.c Include/shader/shader.c -o out -lGL -lglfw -ldl
+	gcc main.c ./Include/glad/glad.c ./Include/shader/shader.c ./Include/stb_image/stb_image.c -o out -lGL -lglfw -ldl -lm
 
 run:
 	./out
