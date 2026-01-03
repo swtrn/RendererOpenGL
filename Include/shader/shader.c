@@ -114,3 +114,8 @@ void SetInt(Shader *shader, const char *name, int value) {
 void SetFloat(Shader *shader, const char *name, float value) {
   glUniform1i(glGetUniformLocation(shader->ID, name), value);
 };
+
+void SetMat4(Shader *shader, const char *name, float *pointer) {
+  int uniformLocation = glGetUniformLocation(shader->ID, name);
+  glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, pointer);
+};
