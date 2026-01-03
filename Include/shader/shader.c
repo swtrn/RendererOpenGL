@@ -99,7 +99,7 @@ Shader *NewShader(const char *vertexPath, const char *fragmentPath) {
 };
 
 // Use function
-void Use(Shader *shader) { glUseProgram(shader->ID); };
+void UseShader(Shader *shader) { glUseProgram(shader->ID); };
 
 // Utility functions
 
