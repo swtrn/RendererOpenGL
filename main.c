@@ -7,6 +7,11 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
+
+#ifdef __APPLE__
+glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
 
 // Settings
 const unsigned int SCR_WIDTH = 800;
@@ -15,10 +20,6 @@ const unsigned int SCR_HEIGHT = 600;
 // TODO: Organize code into more functions to be properly used in other
 //       projects.
 // TODO: Add camera movement.
-
-#ifdef __APPLE__
-glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
 
 unsigned int VBO, VAO, EBO;      // Vertex objects
 unsigned int texture1, texture2; // Texture
