@@ -12,6 +12,10 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+// TODO: Organize code into more functions to be properly used in other
+//       projects.
+// TODO: Add camera movement.
+
 #ifdef __APPLE__
 glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
@@ -19,6 +23,12 @@ glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 unsigned int VBO, VAO, EBO;      // Vertex objects
 unsigned int texture1, texture2; // Texture
 Shader *shader;                  // Shader
+
+vec3 cubePositions[] = {{0.0f, 0.0f, 0.0f},    {2.0f, 5.0f, -15.0f},
+                        {-1.5f, -2.2f, -2.5f}, {-3.8f, -2.0f, -12.3f},
+                        {2.4f, -0.4f, -3.5f},  {-1.7f, 3.0f, -7.5f},
+                        {1.3f, -2.0f, -2.5f},  {1.5f, 2.0f, -2.5f},
+                        {1.5f, 0.2f, -1.5f},   {-1.3f, 1.0f, -1.5f}};
 
 // The function below is called whenever user resizes window.
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
@@ -32,6 +42,7 @@ void processInput(GLFWwindow *window) {
     glfwSetWindowShouldClose(window, true);
 }
 
+// Loads a texture
 void LoadTexture(char *texturePath) {
   // Loading image
   int width, height, numberChannels;
@@ -58,22 +69,21 @@ void Update(GLFWwindow *window) {
 
   // Render
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  mat4 model, view, projection;
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Matrices
-  glm_mat4_identity(model);
+  mat4 view, projection;
+
   glm_mat4_identity(view);
 
-  glm_rotate(model, glm_rad(-55.f), (vec3){1., 0., 0.});
   glm_translate(view, (vec3){0., 0., -3.});
   glm_perspective(glm_rad(45.), 800. / 600., 0.1, 100., projection);
 
-  // Sending matrices to shader
-  char *varNames[] = {"model", "view", "projection"};
-  float *matPointers[3] = {*model, *view, *projection};
-  for (int i = 0; i < 3; i++) {
+  // Sending projection and view matrices to shader
+  char *varNames[] = {"view", "projection"};
+  float *matPointers[] = {*view, *projection};
+  for (int i = 0; i < 2; i++) {
+    // TODO: Transform lines below into setMat4 function in shader struct
     int modelLoc = glGetUniformLocation(shader->ID, varNames[i]);
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, matPointers[i]);
   }
@@ -87,7 +97,22 @@ void Update(GLFWwindow *window) {
   glBindVertexArray(VAO);
 
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+  for (int i = 0; i < 10; i++) {
+    mat4 model;
+    glm_mat4_identity(model);
+
+    // Adding rotation and translation
+    glm_translate(model, cubePositions[i]);
+    float angle = 20. * (i + 1) * (float)glfwGetTime();
+    glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
+
+    int modelLoc = glGetUniformLocation(shader->ID, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, *model);
+
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+  }
 
   // Swap buffers and poll IO events (keys pressed/released, etc)
   glfwSwapBuffers(window);
@@ -134,10 +159,6 @@ int main() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
-  // Color to use with GL_CLAMP_TO_BORDER option
-  // float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
-  // glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
   // Texture filtering
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
@@ -154,60 +175,89 @@ int main() {
   glGenTextures(1, &texture2);
   glBindTexture(GL_TEXTURE_2D, texture2);
 
+  // Loading texture
   LoadTexture("./furina.jpg");
 
   // --- Buffers --- //
-
   float vertices[] = {
-      // positions        // colors         // texture coords
-      0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-      0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-      -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
-  };
+      -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f,
+      0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+      -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
 
-  unsigned int indices[] = {
-      0, 1, 3, // First triangle
-      1, 2, 3  // Second triangle
-  };
+      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+      -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
+
+      -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f,
+      -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
+
+      0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+      0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 0.0f, 1.0f,
+      0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+      -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 1.0f,
+      0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
+      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+      -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+      -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
+
+  // float vertices[] = {
+  //     // positions        // colors         // texture coords
+  //     0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+  //     0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+  //     -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+  //     -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
+  // };
+
+  // unsigned int indices[] = {
+  //     0, 1, 3, // First triangle
+  //     1, 2, 3  // Second triangle
+  // };
 
   // Initializing buffer and vertex array object
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
-  glGenBuffers(1, &EBO);
+  // glGenBuffers(1, &EBO);
 
   // Binding array object
   glBindVertexArray(VAO);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-               GL_STATIC_DRAW);
+  // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+  //              GL_STATIC_DRAW);
 
   // Copies and binds *vertices* to buffer memory
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+  // TODO: change pointer and stride parameters when adding color back
+
   // Position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
   // Color attribute
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
+  // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+  //                       (void *)(3 * sizeof(float)));
+  // glEnableVertexAttribArray(1);
 
   // Texture attribute
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(6 * sizeof(float)));
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(2);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  // Setting shader and textures
+  // Setting shader, textures and functionalities
   Use(shader);
   SetInt(shader, "texture1", 0);
   SetInt(shader, "texture2", 1);
+
+  glEnable(GL_DEPTH_TEST);
 
   // Render loop
   while (!glfwWindowShouldClose(window))
@@ -216,6 +266,7 @@ int main() {
   // Deleting arrays, buffers and programs.
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
+  // glDeleteBuffers(1, &EBO);
   glDeleteProgram(shader->ID);
   free(shader);
 
