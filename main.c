@@ -1,3 +1,4 @@
+#include "Include/cglm/include/cglm/cglm.h"
 #include "Include/glad/glad.h"
 #include "Include/shader/shader.h"
 #include "Include/stb_image/stb_image.h"
@@ -59,6 +60,25 @@ void Update(GLFWwindow *window) {
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
+  mat4 model, view, projection;
+
+  // Matrices
+  glm_mat4_identity(model);
+  glm_mat4_identity(view);
+
+  glm_rotate(model, glm_rad(-55.f), (vec3){1., 0., 0.});
+  glm_translate(view, (vec3){0., 0., -3.});
+  glm_perspective(glm_rad(45.), 800. / 600., 0.1, 100., projection);
+
+  // Sending matrices to shader
+  char *varNames[] = {"model", "view", "projection"};
+  float *matPointers[3] = {*model, *view, *projection};
+  for (int i = 0; i < 3; i++) {
+    int modelLoc = glGetUniformLocation(shader->ID, varNames[i]);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, matPointers[i]);
+  }
+
+  // TODO: Make texture usage more reliable
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, texture1);
   glActiveTexture(GL_TEXTURE1);
