@@ -44,7 +44,11 @@ void processInput(GLFWwindow *window) {
 }
 
 // Loads a texture
-void LoadTexture(char *texturePath) {
+void LoadTexture(int target, unsigned int *texture, char *texturePath) {
+  // Creating and binding textures
+  glGenTextures(1, texture);
+  glBindTexture(target, *texture);
+
   // Loading image
   int width, height, numberChannels;
   stbi_set_flip_vertically_on_load(true);
@@ -61,6 +65,44 @@ void LoadTexture(char *texturePath) {
 
   // Freeing allocated image data
   stbi_image_free(data);
+}
+
+// Binds Textures
+void UseTexture(int texture, int index, int target) {
+  glActiveTexture(GL_TEXTURE0 + index);
+  glBindTexture(target, texture);
+}
+
+// glfw: Initialize and configure window
+GLFWwindow *InitializeWindow(int width, int height, const char *title) {
+  glfwInit();
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+  // glfw window creation
+  GLFWwindow *window = glfwCreateWindow(width, height, title, NULL, NULL);
+
+  if (window == NULL) {
+    printf("Failed to create GLFW window");
+    glfwTerminate();
+    return NULL;
+  }
+
+  glfwMakeContextCurrent(window);
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+  return window;
+}
+
+// glad: Load all OpenGL function pointers
+bool LoadOpenGL() {
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    printf("Failed to initialize GLAD");
+    return false;
+  }
+
+  return true;
 }
 
 // Runs every frame
@@ -83,23 +125,18 @@ void Update(GLFWwindow *window) {
   // Sending projection and view matrices to shader
   char *varNames[] = {"view", "projection"};
   float *matPointers[] = {*view, *projection};
-  for (int i = 0; i < 2; i++) {
-    // TODO: Transform lines below into setMat4 function in shader struct
-    int modelLoc = glGetUniformLocation(shader->ID, varNames[i]);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, matPointers[i]);
-  }
+  for (int i = 0; i < 2; i++)
+    SetMat4(shader, varNames[i], matPointers[i]);
 
-  // TODO: Make texture usage more reliable
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture1);
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, texture2);
+  UseTexture(texture1, 0, GL_TEXTURE_2D);
+  UseTexture(texture2, 1, GL_TEXTURE_2D);
 
   glBindVertexArray(VAO);
 
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+  // Drawing many cubes
   for (int i = 0; i < 10; i++) {
     mat4 model;
     glm_mat4_identity(model);
@@ -109,9 +146,7 @@ void Update(GLFWwindow *window) {
     float angle = 20. * (i + 1) * (float)glfwGetTime();
     glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
 
-    int modelLoc = glGetUniformLocation(shader->ID, "model");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, *model);
-
+    SetMat4(shader, "model", *model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
   }
 
@@ -121,30 +156,14 @@ void Update(GLFWwindow *window) {
 }
 
 int main() {
-  // glfw: initialize and configure
-  glfwInit();
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-  // glfw window creation
-  GLFWwindow *window =
-      glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
-
-  if (window == NULL) {
-    printf("Failed to create GLFW window");
-    glfwTerminate();
+  // Initializing window
+  GLFWwindow *window;
+  if ((window = InitializeWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL")) == NULL)
     return -1;
-  }
 
-  glfwMakeContextCurrent(window);
-  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-  // glad: load all OpenGL function pointers
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    printf("Failed to initialize GLAD");
+  // Loading OpenGL pointers
+  if (!LoadOpenGL())
     return -1;
-  }
 
   // --- Graphics Shader --- //
 
@@ -165,19 +184,9 @@ int main() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                   GL_LINEAR_MIPMAP_LINEAR);
 
-  // Creating and binding first texture
-  glGenTextures(1, &texture1);
-  glBindTexture(GL_TEXTURE_2D, texture1);
-
-  // Loading texture
-  LoadTexture("./miku.jpg");
-
-  // Creating and binding texture
-  glGenTextures(1, &texture2);
-  glBindTexture(GL_TEXTURE_2D, texture2);
-
-  // Loading texture
-  LoadTexture("./furina.jpg");
+  // Loading textures
+  LoadTexture(GL_TEXTURE_2D, &texture1, "./miku.jpg");
+  LoadTexture(GL_TEXTURE_2D, &texture2, "./furina.jpg");
 
   // --- Buffers --- //
   float vertices[] = {
@@ -254,7 +263,7 @@ int main() {
   glBindVertexArray(0);
 
   // Setting shader, textures and functionalities
-  Use(shader);
+  UseShader(shader);
   SetInt(shader, "texture1", 0);
   SetInt(shader, "texture2", 1);
 
