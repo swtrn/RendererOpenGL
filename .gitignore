@@ -1,5 +1,3 @@
-Include/stb_image/
-Include/cglm/
-Include/glad/
+Include/External
 *.jpg
 out

@@ -1,5 +1,11 @@
 #include "./shader.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "../../External/glad/glad.h"
+
 // Utility function for checking shader compilation/linking errors.
 void CheckCompileErrors(unsigned int shader, char *type) {
   int success;
