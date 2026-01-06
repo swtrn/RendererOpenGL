@@ -7,12 +7,13 @@
 #include "../camera/camera.h"
 
 // Settings
-const unsigned int WIDTH = 800;
-const unsigned int HEIGHT = 600;
+const unsigned int WIDTH = 1920;
+const unsigned int HEIGHT = 1080;
 
 // Mouse variables
 bool mouseRDown = false;
 float previousX, previousY;
+float small = 0.000001;
 
 // -- Callback functions -- //
 
@@ -56,11 +57,11 @@ void MouseCallback(GLFWwindow *window, double xPos, double yPos) {
   previousX = xPos;
   previousY = yPos;
 
-  float pitch = GetPitch() + yOffSet / HEIGHT * M_PI;
+  float pitch = GetPitch() + yOffSet / WIDTH * 2 * M_PI;
   float yaw = GetYaw() - xOffSet / WIDTH * 2 * M_PI;
 
   // Clamping pitch
-  pitch = glm_clamp(pitch, -M_PI / 2, M_PI / 2);
+  pitch = glm_clamp(pitch, -M_PI / 2 + small, M_PI / 2 - small);
 
   SetPitch(pitch);
   SetYaw(yaw);

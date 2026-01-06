@@ -22,6 +22,8 @@ void SetPitch(float theta) {
 
   // Updating camera position
   cameraPosition[1] = sin(pitch) * sphereRadius;
+  cameraPosition[0] = sin(yaw) * cos(pitch) * sphereRadius;
+  cameraPosition[2] = cos(yaw) * cos(pitch) * sphereRadius;
 }
 
 // Yaw
@@ -30,8 +32,8 @@ void SetYaw(float theta) {
   yaw = theta;
 
   // Updating camera position
-  cameraPosition[0] = sin(yaw) * sphereRadius;
-  cameraPosition[2] = cos(yaw) * sphereRadius;
+  cameraPosition[0] = sin(yaw) * cos(pitch) * sphereRadius;
+  cameraPosition[2] = cos(yaw) * cos(pitch) * sphereRadius;
 }
 
 // Radius
@@ -40,8 +42,8 @@ void SetRadius(float radius) {
   sphereRadius = radius;
 
   // Updating camera position
-  cameraPosition[0] = sin(yaw) * sphereRadius;
-  cameraPosition[2] = cos(yaw) * sphereRadius;
+  cameraPosition[0] = sin(yaw) * cos(pitch) * sphereRadius;
+  cameraPosition[2] = cos(yaw) * cos(pitch) * sphereRadius;
   cameraPosition[1] = sin(pitch) * sphereRadius;
 }
 
