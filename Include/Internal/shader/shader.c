@@ -125,3 +125,8 @@ void SetMat4(Shader *shader, const char *name, float *pointer) {
   int uniformLocation = glGetUniformLocation(shader->ID, name);
   glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, pointer);
 };
+
+void SetVec3(Shader *shader, const char *name, float *pointer) {
+  int uniformLocation = glGetUniformLocation(shader->ID, name);
+  glUniform3fv(uniformLocation, 1, pointer);
+};
