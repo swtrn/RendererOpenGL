@@ -52,7 +52,7 @@ bool LoadOpenGL() {
   return true;
 }
 
-void SetProjection() {
+void SetProjection(Shader *shader) {
   // Matrices
   mat4 view, projection;
 
@@ -66,6 +66,14 @@ void SetProjection() {
     SetMat4(shader, varNames[i], matPointers[i]);
 }
 
+void SetTransform(mat4 matrix, vec3 position, float angle, vec3 rotationAxis,
+                  vec3 scale) {
+  glm_mat4_identity(matrix);
+  glm_translate(matrix, position);
+  glm_rotate(matrix, angle, rotationAxis);
+  glm_scale(matrix, scale);
+}
+
 // Runs every frame
 void Update() {
   // Input
@@ -75,32 +83,46 @@ void Update() {
   glClearColor(0.2, 0.2, 0.2, 1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // Setting camera projection
-  SetProjection();
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+  // Setting lightingShader
+  UseShader(lightingShader);
+
+  // Enabling colors
+  vec3 objectColor = {1., .5, .32};
+  vec3 lightColor = {1., 1., 1.};
+
+  SetVec3(lightingShader, "objectColor", objectColor);
+  SetVec3(lightingShader, "lightColor", lightColor);
 
   // Enabling textures
   UseTexture(texture1, 0, GL_TEXTURE_2D);
   UseTexture(texture2, 1, GL_TEXTURE_2D);
 
+  mat4 model; // Matrix holder
+
+  // Setting matrices
+  SetTransform(model, cubePosition, glm_rad(20. * glfwGetTime()),
+               (vec3){1., .3, .5}, (vec3){1., 1., 1.});
+
+  SetMat4(lightingShader, "model", *model);
+  SetProjection(lightingShader);
+
+  // Bind and draw
   glBindVertexArray(VAO);
+  glDrawArrays(GL_TRIANGLES, 0, 36);
 
-  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  // Setting lightShader
+  UseShader(lightShader);
 
-  // Initializing model matrix
-  mat4 model;
-  glm_mat4_identity(model);
+  // Setting matrices
+  SetTransform(model, lightPosition, 0., (vec3){0, 1., 0}, (vec3){.2, .2, .2});
 
-  // Adding translation
-  glm_translate(model, cubePositions[0]);
+  SetMat4(lightShader, "model", *model);
+  SetProjection(lightShader);
 
-  // Adding rotation
-  float angle = 0.;
-  glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
-
-  SetMat4(shader, "model", *model);
-
-  // Draw
+  // Bind and draw
+  glBindVertexArray(lightVAO);
   glDrawArrays(GL_TRIANGLES, 0, 36);
 
   // Swap buffers and poll IO events (keys pressed/released, etc)
