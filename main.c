@@ -8,44 +8,39 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-GLFWwindow *window; // Window
-Shader *shader;     // Shader
+GLFWwindow *window;     // Window
+Shader *lightingShader; // Lightning shader
+Shader *lightShader;    // Light itself shader
 
 // Vertices
 float vertices[] = {
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f,
-    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
-    -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f,
+    0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, -0.5f,
 
-    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,
+    0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,
 
-    -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,
 
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
-    0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 0.0f, 1.0f,
-    0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f,
+    0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,
 
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 1.0f,
-    0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,
+    0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f,
 
-    -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
+    -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,
+    0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f};
 
 // Cube positions
-vec3 cubePositions[] = {{0.0f, 0.0f, 0.0f},    {2.0f, 5.0f, -15.0f},
-                        {-1.5f, -2.2f, -2.5f}, {-3.8f, -2.0f, -12.3f},
-                        {2.4f, -0.4f, -3.5f},  {-1.7f, 3.0f, -7.5f},
-                        {1.3f, -2.0f, -2.5f},  {1.5f, 2.0f, -2.5f},
-                        {1.5f, 0.2f, -1.5f},   {-1.3f, 1.0f, -1.5f}};
+vec3 cubePosition = {0.0f, 0.0f, 0.0f};
+vec3 lightPosition = {1.2f, 1.0f, 2.0f};
 
 unsigned int VBO, VAO, EBO;      // Vertex objects
 unsigned int texture1, texture2; // Texture
+
+// Light VAO
+unsigned int lightVAO;
 
 // glad: Load all OpenGL function pointers
 bool LoadOpenGL() {
@@ -128,9 +123,11 @@ int main() {
   // Shader paths
   const char *vertexPath = "./Shaders/vertexShader.glsl";
   const char *fragmentPath = "./Shaders/fragmentShader.glsl";
+  const char *lightPath = "./Shaders/light.glsl";
 
-  // Generating shader
-  shader = NewShader(vertexPath, fragmentPath);
+  // Generating shaders
+  lightingShader = NewShader(vertexPath, fragmentPath);
+  lightShader = NewShader(vertexPath, lightPath);
 
   // --- Textures --- //
 
@@ -161,23 +158,33 @@ int main() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
   // Position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
   // Texture attribute
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(2);
+  // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+  //                       (void *)(3 * sizeof(float)));
+  // glEnableVertexAttribArray(2);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  // -- Light VAO -- //
+
+  glGenVertexArrays(1, &lightVAO);
+  glBindVertexArray(lightVAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+
+  // Unbinding VAO and clearing VBO
   glBindVertexArray(0);
-
-  // Setting shader, textures and functionalities
-  UseShader(shader);
-  SetInt(shader, "texture1", 0);
-  SetInt(shader, "texture2", 1);
-
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
   glEnable(GL_DEPTH_TEST);
+
+  // Setting shader textures
+  UseShader(lightingShader);
+
+  SetInt(lightingShader, "texture1", 0);
+  SetInt(lightingShader, "texture2", 1);
 
   // Initializing camera
   SetRadius(4.);
@@ -189,8 +196,8 @@ int main() {
   // Deleting arrays, buffers and programs.
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
-  glDeleteProgram(shader->ID);
-  free(shader);
+  glDeleteProgram(lightingShader->ID);
+  free(lightingShader);
 
   // Clearing everything
   glfwTerminate();
