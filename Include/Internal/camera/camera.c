@@ -5,7 +5,7 @@
 #include <math.h>
 
 // Constant
-const float FOV = 45.;
+const float FOV = 90.;
 
 // Variables
 float cameraPosition[3];

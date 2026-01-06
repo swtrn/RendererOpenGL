@@ -8,7 +8,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-Shader *shader; // Shader
+GLFWwindow *window; // Window
+Shader *shader;     // Shader
 
 // Vertices
 float vertices[] = {
@@ -71,7 +72,7 @@ void SetProjection() {
 }
 
 // Runs every frame
-void Update(GLFWwindow *window) {
+void Update() {
   // Input
   ProcessInput(window);
 
@@ -91,28 +92,30 @@ void Update(GLFWwindow *window) {
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-  // Drawing many cubes
-  for (int i = 0; i < 10; i++) {
-    mat4 model;
-    glm_mat4_identity(model);
+  // Initializing model matrix
+  mat4 model;
+  glm_mat4_identity(model);
 
-    // Adding rotation and translation
-    glm_translate(model, cubePositions[i]);
-    float angle = 20. * (i + 1);
-    glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
+  // Adding translation
+  glm_translate(model, cubePositions[0]);
 
-    SetMat4(shader, "model", *model);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-  }
+  // Adding rotation
+  float angle = 0.;
+  glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
+
+  SetMat4(shader, "model", *model);
+
+  // Draw
+  glDrawArrays(GL_TRIANGLES, 0, 36);
 
   // Swap buffers and poll IO events (keys pressed/released, etc)
   glfwSwapBuffers(window);
   glfwPollEvents();
 }
 
+// Main
 int main() {
   // Initializing window
-  GLFWwindow *window;
   if ((window = InitializeWindow(WIDTH, HEIGHT, "LearnOpenGL")) == NULL)
     return -1;
 
@@ -177,11 +180,11 @@ int main() {
   glEnable(GL_DEPTH_TEST);
 
   // Initializing camera
-  SetRadius(10.);
+  SetRadius(4.);
 
   // Render loop
   while (!glfwWindowShouldClose(window))
-    Update(window);
+    Update();
 
   // Deleting arrays, buffers and programs.
   glDeleteVertexArrays(1, &VAO);
