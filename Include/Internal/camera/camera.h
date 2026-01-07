@@ -14,6 +14,8 @@ void SetYaw(float theta);
 float GetRadius();
 void SetRadius(float radius);
 
+void GetCameraPosition(vec3 cameraPosition);
+
 void GetViewMatrix(mat4 view);
 void GetProjectionMatrix(mat4 projection);
 

@@ -47,6 +47,12 @@ void SetRadius(float radius) {
   cameraPosition[1] = sin(pitch) * sphereRadius;
 }
 
+// Camera position
+void GetCameraPosition(vec3 position) {
+  for (int i = 0; i < 3; i++)
+    position[i] = cameraPosition[i];
+}
+
 // -- Matrices -- //
 
 void GetViewMatrix(mat4 view) {
