@@ -5,6 +5,7 @@
 #include "Include/Internal/texture/texture.h"
 #include "Include/Internal/window/window.h"
 
+#include <GLFW/glfw3.h>
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -113,9 +114,20 @@ void Update() {
   SetVec3(objectShader, "material.specular", (vec3){0.5f, 0.5f, 0.5f});
   SetFloat(objectShader, "material.shine", 32.f);
 
-  // Shader information
-  SetVec3(objectShader, "lightColor", lightColor);
-  SetVec3(objectShader, "lightPosition", lightPosition);
+  // Making variable RGB light
+  float time = glfwGetTime();
+  vec3 lightColor = {sin(time * 2.0f), sin(time * 0.7f), sin(time * 1.3f)};
+
+  vec3 diffuseColor, ambientColor;
+  glm_vec3_mul(lightColor, (vec3){0.5f, 0.5f, 0.5f}, diffuseColor);
+  glm_vec3_mul(lightColor, (vec3){0.2f, 0.2f, 0.2f}, ambientColor);
+
+  // Light
+  SetVec3(objectShader, "light.ambient", ambientColor);
+  SetVec3(objectShader, "light.diffuse", diffuseColor);
+  SetVec3(objectShader, "light.specular", (vec3){1.0f, 1.0f, 1.0f});
+  SetVec3(objectShader, "light.position", lightPosition);
+
   SetVec3(objectShader, "viewPosition", cameraPosition);
 
   // Enabling textures
