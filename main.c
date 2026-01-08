@@ -49,7 +49,6 @@ vec3 cubePosition = {0.0f, 0.0f, 0.0f};
 vec3 lightPosition = {1.2f, 1.0f, 2.0f};
 
 // Colors
-vec3 objectColor = {1., .5, .32};
 vec3 lightColor = {1., 1., 1.};
 
 unsigned int VBO, VAO, EBO;      // Vertex objects
@@ -108,9 +107,14 @@ void Update() {
   // Setting objectShader
   UseShader(objectShader);
 
-  SetVec3(objectShader, "objectColor", objectColor);
-  SetVec3(objectShader, "lightColor", lightColor);
+  // Material
+  SetVec3(objectShader, "material.ambient", (vec3){1.0f, 0.5f, 0.31f});
+  SetVec3(objectShader, "material.diffuse", (vec3){1.0f, 0.5f, 0.31f});
+  SetVec3(objectShader, "material.specular", (vec3){0.5f, 0.5f, 0.5f});
+  SetFloat(objectShader, "material.shine", 32.f);
 
+  // Shader information
+  SetVec3(objectShader, "lightColor", lightColor);
   SetVec3(objectShader, "lightPosition", lightPosition);
   SetVec3(objectShader, "viewPosition", cameraPosition);
 
