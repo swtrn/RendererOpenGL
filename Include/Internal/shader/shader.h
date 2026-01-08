@@ -18,6 +18,7 @@ void SetBool(Shader *shader, const char *name, bool value);
 void SetInt(Shader *shader, const char *name, int value);
 void SetFloat(Shader *shader, const char *name, float value);
 void SetMat4(Shader *shader, const char *name, float *pointer);
+void SetMat3(Shader *shader, const char *name, float *pointer);
 void SetVec3(Shader *shader, const char *name, float *pointer);
 
 #endif
