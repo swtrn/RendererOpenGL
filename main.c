@@ -77,9 +77,9 @@ void SetProjection(Shader *shader) {
 
   // Sending projection and view matrices to shader
   char *varNames[] = {"view", "projection"};
-  float *matPointers[] = {*view, *projection};
+  mat4 *matPointers[] = {&view, &projection};
   for (int i = 0; i < 2; i++)
-    SetMat4(shader, varNames[i], matPointers[i]);
+    SetMat4(shader, varNames[i], *matPointers[i]);
 }
 
 void SetTransform(mat4 matrix, vec3 position, float angle, vec3 rotationAxis,
@@ -118,15 +118,15 @@ void Update() {
   UseTexture(texture1, 0, GL_TEXTURE_2D);
   UseTexture(texture2, 1, GL_TEXTURE_2D);
 
-  mat4 model; // Matrix holder
-
   // Setting matrices
 
+  mat4 model; // Matrix holder
+
   // Model matrix
-  SetTransform(model, cubePosition, glm_rad(0. * glfwGetTime()),
+  SetTransform(model, cubePosition, glm_rad(20. * glfwGetTime()),
                (vec3){1., .3, .5}, (vec3){1., 1., 1.});
 
-  SetMat4(objectShader, "model", *model);
+  SetMat4(objectShader, "model", model);
   SetProjection(objectShader);
 
   // Normal matrix
@@ -136,7 +136,7 @@ void Update() {
   glm_mat4_inv(model, normalMatrix4x4);
   glm_mat4_pick3t(normalMatrix4x4, normalMatrix);
 
-  SetMat3(objectShader, "normalMatrix", *normalMatrix);
+  SetMat3(objectShader, "normalMatrix", normalMatrix);
 
   // Bind and draw
   glBindVertexArray(VAO);
@@ -148,7 +148,7 @@ void Update() {
   // Setting matrices
   SetTransform(model, lightPosition, 0., (vec3){0, 1., 0}, (vec3){.2, .2, .2});
 
-  SetMat4(lightShader, "model", *model);
+  SetMat4(lightShader, "model", model);
   SetProjection(lightShader);
 
   // Bind and draw
