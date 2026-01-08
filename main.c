@@ -121,11 +121,22 @@ void Update() {
   mat4 model; // Matrix holder
 
   // Setting matrices
+
+  // Model matrix
   SetTransform(model, cubePosition, glm_rad(0. * glfwGetTime()),
                (vec3){1., .3, .5}, (vec3){1., 1., 1.});
 
   SetMat4(objectShader, "model", *model);
   SetProjection(objectShader);
+
+  // Normal matrix
+  mat4 normalMatrix4x4;
+  mat3 normalMatrix;
+
+  glm_mat4_inv(model, normalMatrix4x4);
+  glm_mat4_pick3t(normalMatrix4x4, normalMatrix);
+
+  SetMat3(objectShader, "normalMatrix", *normalMatrix);
 
   // Bind and draw
   glBindVertexArray(VAO);
@@ -241,10 +252,15 @@ int main() {
     Update();
 
   // Deleting arrays, buffers and programs.
+  glDeleteVertexArrays(1, &lightVAO);
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
+
   glDeleteProgram(objectShader->ID);
+  glDeleteProgram(lightShader->ID);
+
   free(objectShader);
+  free(lightShader);
 
   // Clearing everything
   glfwTerminate();
