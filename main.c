@@ -59,8 +59,12 @@ vec3 cubePositions[] = {{0.0f, 0.0f, 0.0f},    {2.0f, 5.0f, -15.0f},
                         {1.3f, -2.0f, -2.5f},  {1.5f, 2.0f, -2.5f},
                         {1.5f, 0.2f, -1.5f},   {-1.3f, 1.0f, -1.5f}};
 
+vec3 lightPosition = {1.2f, 1.0f, 2.0f};
+
 unsigned int VBO, VAO, EBO;           // Vertex objects
 unsigned int diffuseMap, specularMap; // Texture
+
+unsigned int lightVAO;
 
 // glad: Load all OpenGL function pointers
 bool LoadOpenGL() {
@@ -119,7 +123,11 @@ void Update() {
   SetVec3(objectShader, "light.ambient", (vec3){.2f, .2f, .2f});
   SetVec3(objectShader, "light.diffuse", (vec3){.5f, .5f, .5f});
   SetVec3(objectShader, "light.specular", (vec3){1.0f, 1.0f, 1.0f});
-  SetVec3(objectShader, "light.direction", (vec3){-.2f, -1.f, -.3f});
+  SetVec3(objectShader, "light.position", lightPosition);
+
+  SetFloat(objectShader, "light.constant", 1.0f);
+  SetFloat(objectShader, "light.linear", 0.09f);
+  SetFloat(objectShader, "light.quadratic", 0.032f);
 
   SetVec3(objectShader, "viewPosition", cameraPosition);
 
@@ -153,6 +161,19 @@ void Update() {
     glDrawArrays(GL_TRIANGLES, 0, 36);
   }
 
+  // Setting lightShader
+  UseShader(lightShader);
+
+  SetProjection(lightShader);
+
+  // Model matrix
+  SetTransform(model, lightPosition, 0., GLM_VEC3_ONE, (vec3){.2, .2, .2});
+  SetMat4(lightShader, "model", model);
+
+  // Bind and draw
+  glBindVertexArray(lightVAO);
+  glDrawArrays(GL_TRIANGLES, 0, 36);
+
   // Swap buffers and poll IO events (keys pressed/released, etc)
   glfwSwapBuffers(window);
   glfwPollEvents();
@@ -171,7 +192,7 @@ int main() {
   // --- Graphics Shader --- //
 
   // Shader paths
-  const char *objectFragmentPath = "./Shaders/Textured/directionalCaster.glsl";
+  const char *objectFragmentPath = "./Shaders/Textured/pointCaster.glsl";
   const char *objectVertexPath = "./Shaders/Textured/objectVertex.glsl";
 
   const char *lightFragmentPath = "./Shaders/Light/lightFragment.glsl";
@@ -214,6 +235,16 @@ int main() {
                         (void *)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
 
+  // -- light VAO -- //
+
+  glGenVertexArrays(1, &lightVAO);
+  glBindVertexArray(lightVAO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+  // Position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+
   // Unbinding VAO and clearing VBO
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -234,6 +265,7 @@ int main() {
     Update();
 
   // Deleting arrays, buffers and programs.
+  glDeleteVertexArrays(1, &lightVAO);
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
 
