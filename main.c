@@ -15,45 +15,49 @@ Shader *lightShader;  // Light itself shader
 
 // Vertices
 float vertices[] = {
-    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  -0.5f, -0.5f,
-    0.0f,  0.0f,  -1.0f, 0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,
-    0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, -0.5f, 0.5f,  -0.5f,
-    0.0f,  0.0f,  -1.0f, -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
+    // positions          // normals           // texture coords
+    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.5f,  -0.5f,
+    -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 0.0f,
+    0.0f,  -1.0f, 1.0f,  1.0f,  0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,
+    1.0f,  1.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,
 
-    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,
-    0.0f,  0.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  -0.5f, 0.5f,  0.5f,
-    0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.5f,  -0.5f,
+    0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,
+    0.0f,  1.0f,  1.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    1.0f,  1.0f,  -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
-    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f,
-    -1.0f, 0.0f,  0.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  -0.5f, -0.5f, 0.5f,
-    -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,
+    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,
+    -0.5f, -1.0f, 0.0f,  0.0f,  1.0f,  1.0f,  -0.5f, -0.5f, -0.5f, -1.0f,
+    0.0f,  0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,
+    0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  -1.0f, 0.0f,  0.0f,  0.0f,  0.0f,
+    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
 
-    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  -0.5f,
-    1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,
-    0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, 0.5f,
-    1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,
+    -0.5f, 1.0f,  0.0f,  0.0f,  1.0f,  1.0f,  0.5f,  -0.5f, -0.5f, 1.0f,
+    0.0f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,
+    0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, -0.5f,
-    0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,
-    0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  -0.5f, -0.5f, 0.5f,
-    0.0f,  -1.0f, 0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.5f,  -0.5f,
+    -0.5f, 0.0f,  -1.0f, 0.0f,  1.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  0.0f,
+    -1.0f, 0.0f,  1.0f,  0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,
+    1.0f,  0.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,
 
-    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  -0.5f,
-    0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  0.5f,
-    0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f};
+    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.5f,  0.5f,
+    -0.5f, 0.0f,  1.0f,  0.0f,  1.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,
+    1.0f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    1.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f};
 
 // Positions
 vec3 cubePosition = {0.0f, 0.0f, 0.0f};
 vec3 lightPosition = {1.2f, 1.0f, 2.0f};
 
-// Colors
-vec3 lightColor = {1., 1., 1.};
-
-unsigned int VBO, VAO, EBO;      // Vertex objects
-unsigned int texture1, texture2; // Texture
+unsigned int VBO, VAO, EBO;           // Vertex objects
+unsigned int diffuseMap, specularMap; // Texture
 
 // Light VAO
 unsigned int lightVAO;
@@ -109,30 +113,15 @@ void Update() {
   UseShader(objectShader);
 
   // Material
-  SetVec3(objectShader, "material.ambient", (vec3){1.0f, 0.5f, 0.31f});
-  SetVec3(objectShader, "material.diffuse", (vec3){1.0f, 0.5f, 0.31f});
-  SetVec3(objectShader, "material.specular", (vec3){0.5f, 0.5f, 0.5f});
-  SetFloat(objectShader, "material.shine", 32.f);
-
-  // Making variable RGB light
-  float time = glfwGetTime();
-  vec3 lightColor = {sin(time * 2.0f), sin(time * 0.7f), sin(time * 1.3f)};
-
-  vec3 diffuseColor, ambientColor;
-  glm_vec3_mul(lightColor, (vec3){0.5f, 0.5f, 0.5f}, diffuseColor);
-  glm_vec3_mul(lightColor, (vec3){0.2f, 0.2f, 0.2f}, ambientColor);
+  SetFloat(objectShader, "material.shine", 64.f);
 
   // Light
-  SetVec3(objectShader, "light.ambient", ambientColor);
-  SetVec3(objectShader, "light.diffuse", diffuseColor);
+  SetVec3(objectShader, "light.ambient", (vec3){.2f, .2f, .2f});
+  SetVec3(objectShader, "light.diffuse", (vec3){.5f, .5f, .5f});
   SetVec3(objectShader, "light.specular", (vec3){1.0f, 1.0f, 1.0f});
   SetVec3(objectShader, "light.position", lightPosition);
 
   SetVec3(objectShader, "viewPosition", cameraPosition);
-
-  // Enabling textures
-  UseTexture(texture1, 0, GL_TEXTURE_2D);
-  UseTexture(texture2, 1, GL_TEXTURE_2D);
 
   // Setting matrices
 
@@ -153,6 +142,10 @@ void Update() {
   glm_mat4_pick3t(normalMatrix4x4, normalMatrix);
 
   SetMat3(objectShader, "normalMatrix", normalMatrix);
+
+  // Enabling textures
+  UseTexture(diffuseMap, 0, GL_TEXTURE_2D);
+  UseTexture(specularMap, 1, GL_TEXTURE_2D);
 
   // Bind and draw
   glBindVertexArray(VAO);
@@ -189,8 +182,8 @@ int main() {
   // --- Graphics Shader --- //
 
   // Shader paths
-  const char *objectFragmentPath = "./Shaders/objectFragment.glsl";
-  const char *objectVertexPath = "./Shaders/objectVertex.glsl";
+  const char *objectFragmentPath = "./Shaders/diffuseMapFragment.glsl";
+  const char *objectVertexPath = "./Shaders/diffuseMapVertex.glsl";
   const char *lightFragmentPath = "./Shaders/lightFragment.glsl";
   const char *lightVertexPath = "./Shaders/lightVertex.glsl";
 
@@ -200,18 +193,9 @@ int main() {
 
   // --- Textures --- //
 
-  // Texture wrapping
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
-  // Texture filtering
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-
   // Loading textures
-  LoadTexture(GL_TEXTURE_2D, &texture1, "./miku.jpg");
-  LoadTexture(GL_TEXTURE_2D, &texture2, "./furina.jpg");
+  LoadTexture(GL_TEXTURE_2D, &diffuseMap, "./Images/container.png");
+  LoadTexture(GL_TEXTURE_2D, &specularMap, "./Images/containerSpecular.png");
 
   // --- Buffers --- //
 
@@ -227,18 +211,18 @@ int main() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
   // Position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
   // Normals attribute
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
                         (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
   // Texture attribute
-  // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-  //                       (void *)(3 * sizeof(float)));
-  // glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                        (void *)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
 
   // -- Light VAO -- //
 
@@ -246,7 +230,7 @@ int main() {
   glBindVertexArray(lightVAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
   // Unbinding VAO and clearing VBO
@@ -257,8 +241,8 @@ int main() {
   // Setting shader textures
   UseShader(objectShader);
 
-  SetInt(objectShader, "texture1", 0);
-  SetInt(objectShader, "texture2", 1);
+  SetInt(objectShader, "material.diffuse", 0);
+  SetInt(objectShader, "material.specular", 1);
 
   // Initializing camera
   SetRadius(4.);
