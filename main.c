@@ -53,14 +53,14 @@ float vertices[] = {
     -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f};
 
 // Positions
-vec3 cubePosition = {0.0f, 0.0f, 0.0f};
-vec3 lightPosition = {1.2f, 1.0f, 2.0f};
+vec3 cubePositions[] = {{0.0f, 0.0f, 0.0f},    {2.0f, 5.0f, -15.0f},
+                        {-1.5f, -2.2f, -2.5f}, {-3.8f, -2.0f, -12.3f},
+                        {2.4f, -0.4f, -3.5f},  {-1.7f, 3.0f, -7.5f},
+                        {1.3f, -2.0f, -2.5f},  {1.5f, 2.0f, -2.5f},
+                        {1.5f, 0.2f, -1.5f},   {-1.3f, 1.0f, -1.5f}};
 
 unsigned int VBO, VAO, EBO;           // Vertex objects
 unsigned int diffuseMap, specularMap; // Texture
-
-// Light VAO
-unsigned int lightVAO;
 
 // glad: Load all OpenGL function pointers
 bool LoadOpenGL() {
@@ -119,50 +119,39 @@ void Update() {
   SetVec3(objectShader, "light.ambient", (vec3){.2f, .2f, .2f});
   SetVec3(objectShader, "light.diffuse", (vec3){.5f, .5f, .5f});
   SetVec3(objectShader, "light.specular", (vec3){1.0f, 1.0f, 1.0f});
-  SetVec3(objectShader, "light.position", lightPosition);
+  SetVec3(objectShader, "light.direction", (vec3){-.2f, -1.f, -.3f});
 
   SetVec3(objectShader, "viewPosition", cameraPosition);
 
-  // Setting matrices
-
-  mat4 model; // Matrix holder
-
-  // Model matrix
-  SetTransform(model, cubePosition, glm_rad(20. * glfwGetTime()),
-               (vec3){1., .3, .5}, (vec3){1., 1., 1.});
-
-  SetMat4(objectShader, "model", model);
   SetProjection(objectShader);
-
-  // Normal matrix
-  mat4 normalMatrix4x4;
-  mat3 normalMatrix;
-
-  glm_mat4_inv(model, normalMatrix4x4);
-  glm_mat4_pick3t(normalMatrix4x4, normalMatrix);
-
-  SetMat3(objectShader, "normalMatrix", normalMatrix);
 
   // Enabling textures
   UseTexture(diffuseMap, 0, GL_TEXTURE_2D);
   UseTexture(specularMap, 1, GL_TEXTURE_2D);
 
-  // Bind and draw
-  glBindVertexArray(VAO);
-  glDrawArrays(GL_TRIANGLES, 0, 36);
-
-  // Setting lightShader
-  UseShader(lightShader);
+  mat4 model; // Model matrix
 
   // Setting matrices
-  SetTransform(model, lightPosition, 0., (vec3){0, 1., 0}, (vec3){.2, .2, .2});
+  for (unsigned int i = 0; i < 10; i++) {
+    // Model matrix
+    SetTransform(model, cubePositions[i], glm_rad(20. * i), (vec3){1., .3, .5},
+                 (vec3){1., 1., 1.});
 
-  SetMat4(lightShader, "model", model);
-  SetProjection(lightShader);
+    // Normal matrix
+    mat4 normalMatrix4x4;
+    mat3 normalMatrix;
 
-  // Bind and draw
-  glBindVertexArray(lightVAO);
-  glDrawArrays(GL_TRIANGLES, 0, 36);
+    glm_mat4_inv(model, normalMatrix4x4);
+    glm_mat4_pick3t(normalMatrix4x4, normalMatrix);
+
+    // Setting matrices
+    SetMat4(objectShader, "model", model);
+    SetMat3(objectShader, "normalMatrix", normalMatrix);
+
+    // Bind and draw
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+  }
 
   // Swap buffers and poll IO events (keys pressed/released, etc)
   glfwSwapBuffers(window);
@@ -182,8 +171,9 @@ int main() {
   // --- Graphics Shader --- //
 
   // Shader paths
-  const char *objectFragmentPath = "./Shaders/Textured/objectFragment.glsl";
+  const char *objectFragmentPath = "./Shaders/Textured/directionalCaster.glsl";
   const char *objectVertexPath = "./Shaders/Textured/objectVertex.glsl";
+
   const char *lightFragmentPath = "./Shaders/Light/lightFragment.glsl";
   const char *lightVertexPath = "./Shaders/Light/lightVertex.glsl";
 
@@ -224,25 +214,17 @@ int main() {
                         (void *)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
 
-  // -- Light VAO -- //
-
-  glGenVertexArrays(1, &lightVAO);
-  glBindVertexArray(lightVAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-
   // Unbinding VAO and clearing VBO
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glEnable(GL_DEPTH_TEST);
 
   // Setting shader textures
   UseShader(objectShader);
 
   SetInt(objectShader, "material.diffuse", 0);
   SetInt(objectShader, "material.specular", 1);
+
+  glEnable(GL_DEPTH_TEST);
 
   // Initializing camera
   SetRadius(4.);
@@ -252,7 +234,6 @@ int main() {
     Update();
 
   // Deleting arrays, buffers and programs.
-  glDeleteVertexArrays(1, &lightVAO);
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
 
