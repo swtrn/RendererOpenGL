@@ -1,6 +1,5 @@
 #version 330 core
 struct Material { 
-  vec3 ambient;
   vec3 diffuse;
   vec3 specular;
   float shine; 
@@ -18,10 +17,6 @@ uniform Light light;
 
 uniform vec3 viewPosition;
 
-// Not in use
-uniform sampler2D texture1;
-uniform sampler2D texture2;
-
 out vec4 FragColor;
 
 in vec3 FragPosition;
@@ -30,7 +25,7 @@ in vec3 Normal;
 
 void main() {
  // Ambient lighting
-  vec3 ambient = light.ambient * material.ambient;
+  vec3 ambient = light.ambient * material.diffuse;
 
   // Diffuse lighting
   vec3 lightDirection = normalize(light.position - FragPosition);
