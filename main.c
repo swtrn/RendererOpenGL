@@ -182,10 +182,10 @@ int main() {
   // --- Graphics Shader --- //
 
   // Shader paths
-  const char *objectFragmentPath = "./Shaders/diffuseMapFragment.glsl";
-  const char *objectVertexPath = "./Shaders/diffuseMapVertex.glsl";
-  const char *lightFragmentPath = "./Shaders/lightFragment.glsl";
-  const char *lightVertexPath = "./Shaders/lightVertex.glsl";
+  const char *objectFragmentPath = "./Shaders/Textured/objectFragment.glsl";
+  const char *objectVertexPath = "./Shaders/Textured/objectVertex.glsl";
+  const char *lightFragmentPath = "./Shaders/Light/lightFragment.glsl";
+  const char *lightVertexPath = "./Shaders/Light/lightVertex.glsl";
 
   // Generating shaders
   objectShader = NewShader(objectVertexPath, objectFragmentPath);
