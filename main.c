@@ -59,7 +59,10 @@ vec3 cubePositions[] = {{0.0f, 0.0f, 0.0f},    {2.0f, 5.0f, -15.0f},
                         {1.3f, -2.0f, -2.5f},  {1.5f, 2.0f, -2.5f},
                         {1.5f, 0.2f, -1.5f},   {-1.3f, 1.0f, -1.5f}};
 
-vec3 lightPosition = {1.2f, 1.0f, 2.0f};
+vec3 lightPositions[] = {{0.7f, 0.2f, 2.0f},
+                         {2.3f, -3.3f, -4.0f},
+                         {-4.0f, 2.0f, -12.0f},
+                         {0.0f, 0.0f, -3.0f}};
 
 unsigned int VBO, VAO, EBO;           // Vertex objects
 unsigned int diffuseMap, specularMap; // Texture
@@ -116,30 +119,52 @@ void Update() {
   // Setting objectShader
   UseShader(objectShader);
 
-  // Material
-  SetFloat(objectShader, "material.shine", 64.f);
-
-  // Light
-  SetVec3(objectShader, "light.ambient", (vec3){.2f, .2f, .2f});
-  SetVec3(objectShader, "light.diffuse", (vec3){.5f, .5f, .5f});
-  SetVec3(objectShader, "light.specular", (vec3){1.0f, 1.0f, 1.0f});
-  SetVec3(objectShader, "light.position", lightPosition);
-
-  SetFloat(objectShader, "light.constant", 1.0f);
-  SetFloat(objectShader, "light.linear", 0.09f);
-  SetFloat(objectShader, "light.quadratic", 0.032f);
-
-  SetVec3(objectShader, "viewPosition", cameraPosition);
-
   SetProjection(objectShader);
 
   // Enabling textures
   UseTexture(diffuseMap, 0, GL_TEXTURE_2D);
   UseTexture(specularMap, 1, GL_TEXTURE_2D);
 
-  mat4 model; // Model matrix
+  // Material
+  SetFloat(objectShader, "material.shine", 64.f);
 
-  // Setting matrices
+  // -- Lights -- //
+
+  // Directional light
+  SetVec3(objectShader, "directionalLight.direction", (vec3){-0.2, -1.0, -0.3});
+  SetVec3(objectShader, "directionalLight.ambient", (vec3){0.05, 0.05, 0.05});
+  SetVec3(objectShader, "directionalLight.diffuse", (vec3){0.4, 0.4, 0.4});
+  SetVec3(objectShader, "directionalLight.specular", (vec3){0.5, 0.5, 0.5});
+
+  // Point lights
+  for (unsigned int i = 0; i < 4; i++) {
+    char buffer[64];
+
+    // Setting vector light parameters
+    for (int j = 0; j < 4; j++) {
+      char *texts[] = {"ambient", "diffuse", "specular", "position"};
+      vec3 vectors[4] = {{.2f, .2f, .2f}, {.5f, .5f, .5f}, {1.0f, 1.0f, 1.0f}};
+      glm_vec3_dup(lightPositions[i], vectors[3]);
+
+      snprintf(buffer, sizeof(buffer), "pointLights[%d].%s", i, texts[j]);
+      SetVec3(objectShader, buffer, vectors[j]);
+    };
+
+    // Setting float light parameters
+    for (int j = 0; j < 3; j++) {
+      char *texts[] = {"constant", "linear", "quadratic"};
+      float values[] = {1.0, 0.09, 0.032};
+
+      snprintf(buffer, sizeof(buffer), "pointLights[%d].%s", i, texts[j]);
+      SetFloat(objectShader, buffer, values[j]);
+    };
+  };
+
+  SetVec3(objectShader, "viewPosition", cameraPosition);
+
+  mat4 model; // Model matrix placeholder
+
+  // Setting cube positions
   for (unsigned int i = 0; i < 10; i++) {
     // Model matrix
     SetTransform(model, cubePositions[i], glm_rad(20. * i), (vec3){1., .3, .5},
@@ -166,13 +191,17 @@ void Update() {
 
   SetProjection(lightShader);
 
-  // Model matrix
-  SetTransform(model, lightPosition, 0., GLM_VEC3_ONE, (vec3){.2, .2, .2});
-  SetMat4(lightShader, "model", model);
+  // Setting light cube positions
+  for (int i = 0; i < 4; i++) {
+    // Model matrix
+    SetTransform(model, lightPositions[i], 0., GLM_VEC3_ONE,
+                 (vec3){.2, .2, .2});
+    SetMat4(lightShader, "model", model);
 
-  // Bind and draw
-  glBindVertexArray(lightVAO);
-  glDrawArrays(GL_TRIANGLES, 0, 36);
+    // Bind and draw
+    glBindVertexArray(lightVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+  }
 
   // Swap buffers and poll IO events (keys pressed/released, etc)
   glfwSwapBuffers(window);
@@ -192,7 +221,7 @@ int main() {
   // --- Graphics Shader --- //
 
   // Shader paths
-  const char *objectFragmentPath = "./Shaders/Textured/pointCaster.glsl";
+  const char *objectFragmentPath = "./Shaders/Textured/multipleCasters.glsl";
   const char *objectVertexPath = "./Shaders/Textured/objectVertex.glsl";
 
   const char *lightFragmentPath = "./Shaders/Light/lightFragment.glsl";
