@@ -42,6 +42,10 @@ char *ReadFile(const char *filePath) {
   fseek(file, 0, SEEK_SET);
 
   char *buffer = malloc(length + 1);
+  if (!buffer) {
+    printf("Failed allocating memory.");
+    return NULL;
+  }
 
   // Writing to buffer
   size_t elements = fread(buffer, 1, length, file);
@@ -59,7 +63,16 @@ char *ReadFile(const char *filePath) {
 Shader *NewShader(const char *vertexPath, const char *fragmentPath) {
   // Reading files
   char *vertexCode = ReadFile(vertexPath);
+  if (!vertexCode) {
+    printf("Failed reading vertex shader.");
+    return NULL;
+  }
+
   char *fragmentCode = ReadFile(fragmentPath);
+  if (!fragmentCode) {
+    printf("Failed reading fragment shader.");
+    return NULL;
+  }
 
   // Assigning to const
   const char *vertexCodeConst = vertexCode;
@@ -85,6 +98,11 @@ Shader *NewShader(const char *vertexPath, const char *fragmentPath) {
 
   // Shader program
   Shader *shader = (Shader *)malloc(sizeof(Shader));
+  if (!shader) {
+    printf("Failed allocating shader memory.");
+    return NULL;
+  };
+
   shader->ID = glCreateProgram();
 
   glAttachShader(shader->ID, vertex);
