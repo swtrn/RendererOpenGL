@@ -146,7 +146,14 @@ void Update() {
       vec3 vectors[4] = {{.2f, .2f, .2f}, {.5f, .5f, .5f}, {1.0f, 1.0f, 1.0f}};
       glm_vec3_dup(lightPositions[i], vectors[3]);
 
-      snprintf(buffer, sizeof(buffer), "pointLights[%d].%s", i, texts[j]);
+      int size =
+          snprintf(buffer, sizeof(buffer), "pointLights[%d].%s", i, texts[j]);
+
+      if (size < 0 || size > sizeof(buffer)) {
+        printf("Invalid buffer size: %d", size);
+        exit(1);
+      };
+
       SetVec3(objectShader, buffer, vectors[j]);
     };
 
@@ -155,7 +162,14 @@ void Update() {
       char *texts[] = {"constant", "linear", "quadratic"};
       float values[] = {1.0, 0.09, 0.032};
 
-      snprintf(buffer, sizeof(buffer), "pointLights[%d].%s", i, texts[j]);
+      int size =
+          snprintf(buffer, sizeof(buffer), "pointLights[%d].%s", i, texts[j]);
+
+      if (size < 0 || size > sizeof(buffer)) {
+        printf("Invalid buffer size: %d", size);
+        exit(1);
+      };
+
       SetFloat(objectShader, buffer, values[j]);
     };
   };
