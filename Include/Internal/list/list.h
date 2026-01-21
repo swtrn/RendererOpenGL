@@ -13,6 +13,8 @@ struct List {
   size_t size;
 } typedef List;
 
+void NewList(List *list);
 void ListAppend(List *list, void *data, size_t size);
 void ListClear(List *list);
-void ListPrint(List *list);
+
+void **ListToArray(List *list);
