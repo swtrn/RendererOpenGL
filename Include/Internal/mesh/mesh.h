@@ -14,6 +14,7 @@ struct Vertex {
 struct Texture {
   unsigned int id;
   char *type;
+  char *path;
 } typedef Texture;
 
 struct Mesh {
