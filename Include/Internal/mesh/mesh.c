@@ -6,6 +6,7 @@
 
 void SetupMesh(Mesh *mesh);
 
+// Initializes mesh
 void NewMesh(Mesh *mesh, List vertices, List indices, List textures) {
   // Initializing mesh variables
   mesh->vertices = vertices;
@@ -16,6 +17,7 @@ void NewMesh(Mesh *mesh, List vertices, List indices, List textures) {
   SetupMesh(mesh);
 };
 
+// Setups meshes with information
 void SetupMesh(Mesh *mesh) {
   unsigned int *VAO = &mesh->VAO;
   unsigned int *VBO = &mesh->VBO;
@@ -76,6 +78,7 @@ void SetupMesh(Mesh *mesh) {
   free(indexPointers);
 };
 
+// Draws mesh using textures
 void DrawMesh(Mesh *mesh, Shader *shader) {
   unsigned int diffuseNumber = 0;
   unsigned int specularNumber = 0;
@@ -106,7 +109,7 @@ void DrawMesh(Mesh *mesh, Shader *shader) {
     int size = snprintf(buffer, sizeof(buffer), "material.%s%d", name, number);
     if (size < 0 || size >= sizeof(buffer)) {
       printf("Invalid buffer size while setting texture: %d", size);
-      exit(1);
+      return;
     };
 
     SetInt(shader, buffer, i);
