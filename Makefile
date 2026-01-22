@@ -1,8 +1,8 @@
 all: 
-	gcc main.c ./Include/External/*/*.c ./Include/Internal/*/*.c -o out -O -lGL -lglfw -ldl -lm
+	gcc main.c ./Include/External/*/*.c ./Include/Internal/*/*.c -o out -O -lGL -lglfw -ldl -lm -lassimp
 
 build:
-	gcc main.c ./Include/External/*/*.c ./Include/Internal/*/*.c -o out -O -lGL -lglfw -ldl -lm
+	gcc main.c ./Include/External/*/*.c ./Include/Internal/*/*.c -o out -O -lGL -lglfw -ldl -lm -lassimp
 
 run:
 	./out
