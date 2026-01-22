@@ -17,8 +17,12 @@ void LoadTexture(int target, unsigned int *texture, char *texturePath) {
   unsigned char *data = stbi_load(texturePath, &width, &height, &numberChannels,
                                   0); // Triangle vertices
 
-  if (!data)
+  // Checking data load
+  if (!data) {
     printf("Failed to load texture.");
+    stbi_image_free(data);
+    return;
+  }
 
   GLenum format;
   switch (numberChannels) {
