@@ -1,8 +1,9 @@
+# TODO: Find correct assimp library or use CMake
 all: 
-	gcc main.c ./Include/External/*/*.c ./Include/Internal/*/*.c -o out -O -lGL -lglfw -ldl -lm -lassimp
+	gcc main.c ./Include/External/*/*.c ./Include/Internal/*/*.c -o out -O -lGL -lglfw -ldl -lm
 
 build:
-	gcc main.c ./Include/External/*/*.c ./Include/Internal/*/*.c -o out -O -lGL -lglfw -ldl -lm -lassimp
+	gcc main.c ./Include/External/*/*.c ./Include/Internal/*/*.c -o out -O -lGL -lglfw -ldl -lm
 
 run:
 	./out
