@@ -5,6 +5,7 @@
 
 void NewList(List *list) { list->size = 0; };
 
+// Adds a node to list
 void ListAppend(List *list, void *data, size_t size) {
   Node *newNode = (Node *)malloc(sizeof(Node));
   if (!newNode) {
@@ -33,6 +34,13 @@ void ListAppend(List *list, void *data, size_t size) {
   list->end = newNode;
 };
 
+// Adds all nodes from target to dest
+void ListInsert(List *dest, List *target) {
+  for (Node *node = target->start; node; node = node->next)
+    ListAppend(dest, &node->data, sizeof(node->data));
+};
+
+// Frees all nodes from list
 void ListClear(List *list) {
   // Clearing nodes
   for (Node *cur = list->start, *next; cur; cur = next) {
@@ -46,6 +54,7 @@ void ListClear(List *list) {
   list->size = 0;
 };
 
+// Creates an array from list
 void **ListToArray(List *list) {
   // Allocating memory for pointer array
   void **arr = (void **)malloc(list->size * sizeof(void *));
@@ -62,5 +71,3 @@ void **ListToArray(List *list) {
   // Returning pointer array of pointers
   return arr;
 };
-
-// TODO: Add Get function

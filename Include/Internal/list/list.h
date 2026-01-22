@@ -1,5 +1,3 @@
-// XOR linked list
-
 #include <stdio.h>
 
 struct Node {
@@ -15,6 +13,7 @@ struct List {
 
 void NewList(List *list);
 void ListAppend(List *list, void *data, size_t size);
+void ListInsert(List *dest, List *target);
 void ListClear(List *list);
 
 void **ListToArray(List *list);
