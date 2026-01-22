@@ -80,8 +80,6 @@ void DrawMesh(Mesh *mesh, Shader *shader) {
   unsigned int diffuseNumber = 0;
   unsigned int specularNumber = 0;
 
-  // TODO: Update to 'get' function from list when created
-
   // Creating pointers array from list
   size_t numTextures = mesh->textures.size;
   Texture **texturePointers = (Texture **)ListToArray(&mesh->textures);
