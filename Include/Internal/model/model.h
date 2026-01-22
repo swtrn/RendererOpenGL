@@ -4,8 +4,6 @@
 #include "../mesh/mesh.h"
 
 struct Model {
-  char *path;
-
   List meshes;
   char *directory;
 } typedef Model;
