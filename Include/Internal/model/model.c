@@ -12,7 +12,7 @@ typedef struct aiMaterial aiMaterial;
 typedef struct aiString aiString;
 
 // Saving loaded textures
-List loadedTextures; // TODO: Free loadedTextures on exit
+List loadedTextures;
 
 void ProcessNode(Model *model, struct aiNode *node,
                  const struct aiScene *scene);
@@ -200,3 +200,6 @@ void LoadMaterialTextures(Model *model, List *textures,
     ListAppend(&loadedTextures, &texture, sizeof(Texture));
   };
 };
+
+// Frees all loaded textures
+void FreeTextures() { ListClear(&loadedTextures); };
