@@ -1,8 +1,8 @@
 #version 330 core
-struct Material { 
+struct Material {
   sampler2D diffuse;
   sampler2D specular;
-  float shine; 
+  float shine;
 };
 
 struct DirectionalLight {
@@ -21,7 +21,7 @@ struct PointLight {
 
   float constant;
   float linear;
-  float quadratic;  
+  float quadratic;
 };
 
 #define POINT_LIGHTS_AMOUNT 4
@@ -53,7 +53,7 @@ void main() {
   for (int i = 0; i < POINT_LIGHTS_AMOUNT; i++) {
     result += CalculatePointLight(pointLights[i], normal, viewDirection);
   }
-  
+
   // TODO: Add spot light
 
   FragColor = vec4(result, 1.0);
