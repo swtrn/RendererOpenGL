@@ -1,3 +1,4 @@
+#include "Include/External/cglm/include/cglm/vec3.h"
 #include "Include/External/glad/glad.h"
 
 #include "Include/Internal/camera/camera.h"
@@ -136,6 +137,27 @@ void Update() {
   SetVec3(objectShader, "directionalLight.diffuse", (vec3){0.4, 0.4, 0.4});
   SetVec3(objectShader, "directionalLight.specular", (vec3){0.5, 0.5, 0.5});
 
+  // Spot light
+
+  // Setting camera direction for spot light
+  vec3 cameraDirection;
+  glm_vec3_copy(cameraPosition, cameraDirection);
+  glm_vec3_flipsign(cameraDirection);
+
+  SetVec3(objectShader, "spotLight.position", cameraPosition);
+  SetVec3(objectShader, "spotLight.direction", cameraDirection);
+
+  SetVec3(objectShader, "spotLight.ambient", (vec3){0.05, 0.05, 0.05});
+  SetVec3(objectShader, "spotLight.diffuse", (vec3){0.8, 0.8, 0.8});
+  SetVec3(objectShader, "spotLight.specular", (vec3){1.0, 1.0, 1.0});
+
+  SetFloat(objectShader, "spotLight.cutOff", cosf(glm_rad(12.5f)));
+  SetFloat(objectShader, "spotLight.outerCutOff", cosf(glm_rad(17.5f)));
+
+  SetFloat(objectShader, "spotLight.constant", 1.);
+  SetFloat(objectShader, "spotLight.linear", 0.09);
+  SetFloat(objectShader, "spotLight.quadratic", 0.032);
+
   // Point lights
   for (unsigned int i = 0; i < 4; i++) {
     char buffer[64];
@@ -143,7 +165,8 @@ void Update() {
     // Setting vector light parameters
     for (int j = 0; j < 4; j++) {
       char *texts[] = {"ambient", "diffuse", "specular", "position"};
-      vec3 vectors[4] = {{.2f, .2f, .2f}, {.5f, .5f, .5f}, {1.0f, 1.0f, 1.0f}};
+      vec3 vectors[4] = {
+          {.02f, .02f, .02f}, {.5f, .5f, .5f}, {1.0f, 1.0f, 1.0f}};
       glm_vec3_dup(lightPositions[i], vectors[3]);
 
       int size =
