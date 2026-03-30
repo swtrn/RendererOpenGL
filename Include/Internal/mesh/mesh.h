@@ -27,5 +27,6 @@ struct Mesh {
 
 void NewMesh(Mesh *mesh, List vertices, List indices, List textures);
 void DrawMesh(Mesh *mesh, Shader *shader);
+void FreeMesh(Mesh *mesh);
 
 #endif
