@@ -12,7 +12,6 @@
 
 GLFWwindow *window;   // Window
 Shader *objectShader; // Lightning shader
-Shader *lightShader;  // Light itself shader
 
 // Vertices
 float vertices[] = {
@@ -67,8 +66,6 @@ vec3 lightPositions[] = {{0.7f, 0.2f, 2.0f},
 
 unsigned int VBO, VAO, EBO;           // Vertex objects
 unsigned int diffuseMap, specularMap; // Texture
-
-unsigned int lightVAO;
 
 // glad: Load all OpenGL function pointers
 bool LoadOpenGL() {
@@ -223,23 +220,6 @@ void Update() {
     glDrawArrays(GL_TRIANGLES, 0, 36);
   }
 
-  // Setting lightShader
-  UseShader(lightShader);
-
-  SetProjection(lightShader);
-
-  // Setting light cube positions
-  for (int i = 0; i < 4; i++) {
-    // Model matrix
-    SetTransform(model, lightPositions[i], 0., GLM_VEC3_ONE,
-                 (vec3){.2, .2, .2});
-    SetMat4(lightShader, "model", model);
-
-    // Bind and draw
-    glBindVertexArray(lightVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-  }
-
   // Swap buffers and poll IO events (keys pressed/released, etc)
   glfwSwapBuffers(window);
   glfwPollEvents();
@@ -260,9 +240,6 @@ int main() {
   // Shader paths
   const char *objectFragmentPath = "./Shaders/Textured/multipleCasters.glsl";
   const char *objectVertexPath = "./Shaders/Textured/objectVertex.glsl";
-
-  const char *lightFragmentPath = "./Shaders/Light/lightFragment.glsl";
-  const char *lightVertexPath = "./Shaders/Light/lightVertex.glsl";
 
   // Generating shaders
   objectShader = NewShader(objectVertexPath, objectFragmentPath);
@@ -301,16 +278,6 @@ int main() {
                         (void *)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
 
-  // -- light VAO -- //
-
-  glGenVertexArrays(1, &lightVAO);
-  glBindVertexArray(lightVAO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-  // Position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-
   // Unbinding VAO and clearing VBO
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -331,15 +298,16 @@ int main() {
     Update();
 
   // Deleting arrays, buffers and programs.
-  glDeleteVertexArrays(1, &lightVAO);
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
 
   glDeleteProgram(objectShader->ID);
-  glDeleteProgram(lightShader->ID);
 
   free(objectShader);
-  free(lightShader);
+
+  // Freeing models and textures
+  // FreeModel(&backpackModel);
+  // FreeTextures();
 
   // Clearing everything
   glfwTerminate();
