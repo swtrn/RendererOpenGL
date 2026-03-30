@@ -195,10 +195,22 @@ void LoadMaterialTextures(Model *model, List *textures,
     texture.type = typeName;
     texture.path = str.data;
 
+    // Creating list if wasn't created yet.
+    if (!loadedTextures.size)
+      NewList(&loadedTextures);
+
     // Adding texture to list and to loaded textures
     ListAppend(textures, &texture, sizeof(Texture));
     ListAppend(&loadedTextures, &texture, sizeof(Texture));
   };
+};
+
+// Frees the model
+void FreeModel(Model *model) {
+  for (Node *node = model->meshes.start; node; node = node->next)
+    FreeMesh(node->data);
+
+  ListClear(&model->meshes);
 };
 
 // Frees all loaded textures

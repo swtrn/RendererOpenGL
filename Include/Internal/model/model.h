@@ -10,6 +10,7 @@ struct Model {
 
 void LoadModel(Model *model, const char *path);
 void DrawModel(Model *model, Shader *shader);
+void FreeModel(Model *model);
 void FreeTextures();
 
 #endif
