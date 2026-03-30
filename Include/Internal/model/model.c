@@ -52,6 +52,7 @@ void LoadModel(Model *model, const char *path) {
   };
 
   ProcessNode(model, scene->mRootNode, scene);
+  NewList(&model->meshes);
 };
 
 // Adds all meshes from a node to a model
@@ -139,7 +140,7 @@ void ProcessMesh(Model *model, Mesh *mesh, struct aiMesh *AImesh,
 
     // Appending diffuse maps to textures
     ListInsert(&textures, &diffuseMaps);
-    ListInsert(&textures, &diffuseMaps);
+    ListInsert(&textures, &specularMaps);
 
     // Clearing lists
     ListClear(&diffuseMaps);
