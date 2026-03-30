@@ -126,3 +126,9 @@ void DrawMesh(Mesh *mesh, Shader *shader) {
   // Free texture array
   free(texturePointers);
 };
+
+void FreeMesh(Mesh *mesh) {
+  ListClear(&mesh->indices);
+  ListClear(&mesh->vertices);
+  ListClear(&mesh->textures);
+};
