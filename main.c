@@ -2,6 +2,7 @@
 #include "Include/External/glad/glad.h"
 
 #include "Include/Internal/camera/camera.h"
+#include "Include/Internal/model/model.h"
 #include "Include/Internal/shader/shader.h"
 #include "Include/Internal/texture/texture.h"
 #include "Include/Internal/window/window.h"
@@ -12,6 +13,9 @@
 
 GLFWwindow *window;   // Window
 Shader *objectShader; // Lightning shader
+
+// Model
+Model backpackModel;
 
 // Vertices
 float vertices[] = {
@@ -196,29 +200,32 @@ void Update() {
 
   SetVec3(objectShader, "viewPosition", cameraPosition);
 
-  mat4 model; // Model matrix placeholder
+  DrawModel(&backpackModel, objectShader);
 
-  // Setting cube positions
-  for (unsigned int i = 0; i < 10; i++) {
-    // Model matrix
-    SetTransform(model, cubePositions[i], glm_rad(20. * i), (vec3){1., .3, .5},
-                 (vec3){1., 1., 1.});
-
-    // Normal matrix
-    mat4 normalMatrix4x4;
-    mat3 normalMatrix;
-
-    glm_mat4_inv(model, normalMatrix4x4);
-    glm_mat4_pick3t(normalMatrix4x4, normalMatrix);
-
-    // Setting matrices
-    SetMat4(objectShader, "model", model);
-    SetMat3(objectShader, "normalMatrix", normalMatrix);
-
-    // Bind and draw
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-  }
+  // mat4 model; // Model matrix placeholder
+  //
+  // // Setting cube positions
+  // for (unsigned int i = 0; i < 10; i++) {
+  //   // Model matrix
+  //   SetTransform(model, cubePositions[i], glm_rad(20. * i), (vec3){1.,
+  //   .3, .5},
+  //                (vec3){1., 1., 1.});
+  //
+  //   // Normal matrix
+  //   mat4 normalMatrix4x4;
+  //   mat3 normalMatrix;
+  //
+  //   glm_mat4_inv(model, normalMatrix4x4);
+  //   glm_mat4_pick3t(normalMatrix4x4, normalMatrix);
+  //
+  //   // Setting matrices
+  //   SetMat4(objectShader, "model", model);
+  //   SetMat3(objectShader, "normalMatrix", normalMatrix);
+  //
+  //   // Bind and draw
+  //   glBindVertexArray(VAO);
+  //   glDrawArrays(GL_TRIANGLES, 0, 36);
+  // }
 
   // Swap buffers and poll IO events (keys pressed/released, etc)
   glfwSwapBuffers(window);
@@ -243,44 +250,46 @@ int main() {
 
   // Generating shaders
   objectShader = NewShader(objectVertexPath, objectFragmentPath);
-  lightShader = NewShader(lightVertexPath, lightFragmentPath);
 
-  // --- Textures --- //
+  // Loading model
+  LoadModel(&backpackModel, "./Models/backpack/backpack.obj");
 
-  // Loading textures
-  LoadTexture(GL_TEXTURE_2D, &diffuseMap, "./Images/container.png");
-  LoadTexture(GL_TEXTURE_2D, &specularMap, "./Images/containerSpecular.png");
-
-  // --- Buffers --- //
-
-  // Initializing buffer and vertex array object
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-
-  // Binding array object
-  glBindVertexArray(VAO);
-
-  // Copies and binds *vertices* to buffer memory
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  // Position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-
-  // Normals attribute
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-
-  // Texture attribute
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);
-
-  // Unbinding VAO and clearing VBO
-  glBindVertexArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  // // --- Textures --- //
+  //
+  // // Loading textures
+  // LoadTexture(GL_TEXTURE_2D, &diffuseMap, "./Images/container.png");
+  // LoadTexture(GL_TEXTURE_2D, &specularMap, "./Images/containerSpecular.png");
+  //
+  // // --- Buffers --- //
+  //
+  // // Initializing buffer and vertex array object
+  // glGenVertexArrays(1, &VAO);
+  // glGenBuffers(1, &VBO);
+  //
+  // // Binding array object
+  // glBindVertexArray(VAO);
+  //
+  // // Copies and binds *vertices* to buffer memory
+  // glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  //
+  // // Position attribute
+  // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void
+  // *)0); glEnableVertexAttribArray(0);
+  //
+  // // Normals attribute
+  // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+  //                       (void *)(3 * sizeof(float)));
+  // glEnableVertexAttribArray(1);
+  //
+  // // Texture attribute
+  // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+  //                       (void *)(6 * sizeof(float)));
+  // glEnableVertexAttribArray(2);
+  //
+  // // Unbinding VAO and clearing VBO
+  // glBindVertexArray(0);
+  // glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   // Setting shader textures
   UseShader(objectShader);
@@ -306,8 +315,8 @@ int main() {
   free(objectShader);
 
   // Freeing models and textures
-  // FreeModel(&backpackModel);
-  // FreeTextures();
+  FreeModel(&backpackModel);
+  FreeTextures();
 
   // Clearing everything
   glfwTerminate();
