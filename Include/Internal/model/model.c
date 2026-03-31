@@ -45,8 +45,10 @@ void LoadModel(Model *model, const char *path) {
   int pathSize = strlen(path);
   for (int i = pathSize - 1; i > 0; i--) {
     if (path[i] == '/') {
-      memcpy(model->directory, &path, i + 1);
-      model->directory[i] = '\0';
+      // Copying path to directory string
+      model->directory = malloc(i + 1);
+      memcpy(model->directory, path, i + 1);
+      model->directory[i + 1] = '\0';
       break;
     }
   };
@@ -212,6 +214,7 @@ void FreeModel(Model *model) {
     FreeMesh(node->data);
 
   ListClear(&model->meshes);
+  free(model->directory);
 };
 
 // Frees all loaded textures
